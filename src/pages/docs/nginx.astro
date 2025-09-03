@@ -210,17 +210,22 @@ const json = await res.json();</code></pre>
     }
 
     async function tryFetchStatic() {
+      // Keep vars outside try so we can reference them in catch without scope errors
+      let pageNum = 1;
+      let limitNum = 10;
       try {
-        const pageVal = (pageInput && 'value' in pageInput && pageInput.value) ? pageInput.value : '1';
-        const limitVal = (limitInput && 'value' in limitInput && limitInput.value) ? Number(limitInput.value) : 10;
-        const fileUrl = new URL(`logs_page_${pageVal}.json`, staticBase || window.location.origin + '/');
+        pageNum = Number((pageInput && 'value' in pageInput && pageInput.value) ? pageInput.value : '1') || 1;
+        limitNum = Number((limitInput && 'value' in limitInput && limitInput.value) ? limitInput.value : '10') || 10;
+        // Build an absolute base URL for the static folder
+        const baseAbs = new URL(staticBase || '/', window.location.origin);
+        const fileUrl = new URL(`logs_page_${pageNum}.json`, baseAbs);
         const res = await fetch(fileUrl.toString());
         const arr = await res.json();
         const total = Array.isArray(arr) ? arr.length : 0;
-        const sliced = Array.isArray(arr) ? arr.slice(0, limitVal) : [];
-        return { code: res.ok ? 200 : res.status || 200, obj: { data: sliced, meta: { page: Number(pageVal), limit: limitVal, total } } };
+        const sliced = Array.isArray(arr) ? arr.slice(0, limitNum) : [];
+        return { code: res.ok ? 200 : (res.status || 200), obj: { data: sliced, meta: { page: pageNum, limit: limitNum, total } } };
       } catch {
-        return { code: 500, obj: { error: 'Failed to load static data', data: [], meta: { page: Number(pageVal) || 1, limit: Number(limitVal) || 10, total: 0 } } };
+        return { code: 500, obj: { error: 'Failed to load static data', data: [], meta: { page: pageNum, limit: limitNum, total: 0 } } };
       }
     }
 
