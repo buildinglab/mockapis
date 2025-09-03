@@ -19,6 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -27,7 +30,7 @@ jobs:
       - name: Build (static) with base path
         env:
           ASTRO_OUTPUT: static
-          ASTRO_BASE: /${{ github.event.repository.name }}/
+          ASTRO_BASE: ${{ steps.pages.outputs.base_path }}
         run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
