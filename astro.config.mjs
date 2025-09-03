@@ -1,8 +1,8 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 
-const output = process.env.ASTRO_OUTPUT || 'hybrid'; // use 'static' for GitHub Pages builds
-const base = process.env.ASTRO_BASE || '/'; // set to '/<repo>/' on GitHub Pages
+const output = process.env.ASTRO_OUTPUT || 'static';
+const base = process.env.ASTRO_BASE || '/mockapis/';
 
 export default defineConfig({
   output,
