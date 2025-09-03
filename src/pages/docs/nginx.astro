@@ -17,6 +17,7 @@ limitations under the License.
 import DocsLayout from "../../layouts/DocsLayout.astro";
 const base = import.meta.env.BASE_URL || "/";
 const endpoint = (base.endsWith('/') ? `${base}api/nginx/v1/logs` : `${base}/api/nginx/v1/logs`);
+const staticLogsBase = (base.endsWith('/') ? `${base}generated/nginx/logs/` : `${base}/generated/nginx/logs/`);
 ---
 <DocsLayout title="Nginx Logs API">
   <article class="grid lg:grid-cols-3 gap-8">
@@ -97,7 +98,7 @@ const json = await res.json();</code></pre>
 &#125;</code></pre>
     </section>
 
-    <aside class="lg:col-span-1" data-endpoint={endpoint}>
+  <aside class="lg:col-span-1" data-endpoint={endpoint} data-static-base={staticLogsBase}>
       <div class="card bg-base-100 shadow">
         <div class="card-body gap-3">
           <h2 class="card-title">Try it</h2>
@@ -135,8 +136,9 @@ const json = await res.json();</code></pre>
   </article>
 
   <script is:inline>
-    const container = document.querySelector('aside[data-endpoint]');
-    const endpointUrl = container && container instanceof HTMLElement && container.dataset.endpoint ? container.dataset.endpoint : '';
+  const container = document.querySelector('aside[data-endpoint]');
+  const endpointUrl = container && container instanceof HTMLElement && container.dataset.endpoint ? container.dataset.endpoint : '';
+  const staticBase = container && container instanceof HTMLElement && container.dataset.staticBase ? container.dataset.staticBase : '';
   const apikey = document.getElementById('apikey');
     const pageInput = document.getElementById('page');
     const limitInput = document.getElementById('limit');
@@ -174,16 +176,17 @@ const json = await res.json();</code></pre>
       setStatus('loading');
       try {
         const t0 = performance.now();
-        const res = await fetch(url);
+        let obj = await tryFetchApi(url);
+        let code = 200;
+        if (!obj) {
+          const fallback = await tryFetchStatic();
+          obj = fallback.obj;
+          code = fallback.code;
+        }
         const t1 = performance.now();
         if (timing) timing.textContent = `${Math.round(t1 - t0)} ms`;
-        const text = await res.text();
-        let obj = null;
-        try { obj = JSON.parse(text); } catch {}
-        if (resultJson) {
-          resultJson.textContent = obj ? JSON.stringify(obj, null, 2) : (typeof text === 'string' ? text : JSON.stringify(text, null, 2));
-        }
-        setStatus(res.ok ? 'success' : 'error', res.status);
+        if (resultJson) resultJson.textContent = JSON.stringify(obj, null, 2);
+        setStatus(code >= 200 && code < 300 ? 'success' : 'error', code);
         if (meta && obj && obj.meta) {
           const m = obj.meta;
           meta.textContent = `meta: page=${m.page ?? '-'} • limit=${m.limit ?? '-'} • total=${m.total ?? '-'}`;
@@ -191,6 +194,33 @@ const json = await res.json();</code></pre>
       } catch (e) {
         if (resultJson) resultJson.textContent = String(e);
         setStatus('error');
+      }
+    }
+
+    async function tryFetchApi(url) {
+      try {
+        const res = await fetch(url);
+        const text = await res.text();
+        const maybeJson = JSON.parse(text);
+        if (res.ok && maybeJson && typeof maybeJson === 'object' && 'data' in maybeJson) {
+          return maybeJson;
+        }
+        return null;
+      } catch { return null; }
+    }
+
+    async function tryFetchStatic() {
+      try {
+        const pageVal = (pageInput && 'value' in pageInput && pageInput.value) ? pageInput.value : '1';
+        const limitVal = (limitInput && 'value' in limitInput && limitInput.value) ? Number(limitInput.value) : 10;
+        const fileUrl = new URL(`logs_page_${pageVal}.json`, staticBase || window.location.origin + '/');
+        const res = await fetch(fileUrl.toString());
+        const arr = await res.json();
+        const total = Array.isArray(arr) ? arr.length : 0;
+        const sliced = Array.isArray(arr) ? arr.slice(0, limitVal) : [];
+        return { code: res.ok ? 200 : res.status || 200, obj: { data: sliced, meta: { page: Number(pageVal), limit: limitVal, total } } };
+      } catch {
+        return { code: 500, obj: { error: 'Failed to load static data', data: [], meta: { page: Number(pageVal) || 1, limit: Number(limitVal) || 10, total: 0 } } };
       }
     }
 
