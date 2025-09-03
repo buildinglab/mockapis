@@ -1,0 +1,45 @@
+---
+/*
+Copyright 2025 G Vaishno Chaitanya
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+import DocsLayout from "../../layouts/DocsLayout.astro";
+const base = import.meta.env.BASE_URL || "/";
+---
+<DocsLayout title="API Reference">
+  <section class="max-w-3xl mx-auto space-y-8">
+    <div class="prose">
+      <h1>API Reference</h1>
+      <p class="text-base-content/80">
+        Clean and minimal docs to help you explore the available endpoints.
+      </p>
+    </div>
+
+    <div class="divide-y rounded-lg border bg-base-100">
+  <a class="block p-4 hover:bg-base-200 transition" href={(base.endsWith('/') ? `${base}docs/nginx/` : `${base}/docs/nginx/`)}>
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="font-medium">Nginx Logs API</div>
+            <div class="text-sm opacity-70">GET /api/nginx/v1/logs</div>
+          </div>
+          <span class="badge">v1</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="alert alert-info">
+      <span>Use the demo key <code>demo123</code> to try the endpoints.</span>
+    </div>
+  </section>
+</DocsLayout>

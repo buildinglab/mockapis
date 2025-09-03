@@ -1,0 +1,59 @@
+---
+/*
+Copyright 2025 G Vaishno Chaitanya
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+<BaseLayout title="API Keys">
+  <section class="max-w-3xl mx-auto space-y-6">
+    <div class="prose">
+      <h1>API Keys</h1>
+      <p>Use these demo keys while exploring the API. In production, keys would be issued per account.</p>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Key</th>
+            <th>Status</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>demo123</code></td>
+            <td><span class="badge badge-success">active</span></td>
+            <td>Full access for demo purposes</td>
+          </tr>
+          <tr>
+            <td><code>readonly</code></td>
+            <td><span class="badge">readonly</span></td>
+            <td>Read-only access</td>
+          </tr>
+          <tr>
+            <td><code>expired</code></td>
+            <td><span class="badge badge-error">expired</span></td>
+            <td>Will be rejected by the API</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="alert">
+      <span>Send the key via query param <code>apikey</code>.</span>
+    </div>
+  </section>
+</BaseLayout>

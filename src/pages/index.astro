@@ -1,0 +1,54 @@
+---
+/*
+Copyright 2025 G Vaishno Chaitanya
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+import BaseLayout from "../layouts/BaseLayout.astro";
+const base = import.meta.env.BASE_URL || "/";
+---
+<BaseLayout title="Mock API Portal">
+  <section class="max-w-4xl mx-auto space-y-8">
+    <div class="prose">
+      <h1>Mock API Portal</h1>
+      <p class="text-base-content/80">
+        A clean, minimal place to explore our mock APIs. Use the demo API keys,
+        read the endpoint docs, and try requests in your browser.
+      </p>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+  <a href={(base.endsWith('/') ? `${base}docs/nginx/` : `${base}/docs/nginx/`)} class="card bg-base-100 shadow hover:shadow-md transition">
+        <div class="card-body">
+          <h2 class="card-title">Nginx Logs API</h2>
+          <p>Paginated access to generated Nginx access logs.</p>
+          <div class="text-sm opacity-70">GET /api/nginx/v1/logs</div>
+        </div>
+      </a>
+
+      <a href={(base.endsWith('/') ? `${base}keys/` : `${base}/keys/`)} class="card bg-base-100 shadow hover:shadow-md transition">
+        <div class="card-body">
+          <h2 class="card-title">API Keys</h2>
+          <p>Built-in demo keys and their states.</p>
+          <div class="text-sm opacity-70">demo123 • readonly • expired</div>
+        </div>
+      </a>
+    </div>
+
+    <div class="alert alert-info">
+      <span>
+        Tip: For quick testing, open the Nginx Logs API and use the Try it panel with the key <code>demo123</code>.
+      </span>
+    </div>
+  </section>
+</BaseLayout>

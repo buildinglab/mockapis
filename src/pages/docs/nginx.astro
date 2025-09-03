@@ -1,0 +1,244 @@
+---
+/*
+Copyright 2025 G Vaishno Chaitanya
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+import DocsLayout from "../../layouts/DocsLayout.astro";
+const base = import.meta.env.BASE_URL || "/";
+const endpoint = (base.endsWith('/') ? `${base}api/nginx/v1/logs` : `${base}/api/nginx/v1/logs`);
+---
+<DocsLayout title="Nginx Logs API">
+  <article class="grid lg:grid-cols-3 gap-8">
+    <section class="prose lg:col-span-2">
+      <div class="flex items-center gap-3">
+        <h1 class="mb-0">Nginx Logs API</h1>
+        <span class="badge badge-primary">v1</span>
+        <span class="badge">stable</span>
+      </div>
+      <p class="text-base-content/80">Fetch generated Nginx access logs. Requires an API key via the apikey query parameter.</p>
+
+      <div class="rounded-lg border bg-base-100 p-4 not-prose flex items-center justify-between gap-4">
+        <div>
+          <div class="text-xs opacity-70">Endpoint</div>
+          <div class="font-mono text-sm">GET {endpoint}</div>
+        </div>
+        <button id="copy-endpoint" class="btn btn-sm">Copy</button>
+      </div>
+
+      <div class="alert alert-info mt-4 not-prose">
+        <span>No headers. Provide your key using the apikey query param only.</span>
+      </div>
+
+      <h3>Parameters</h3>
+      <div class="overflow-x-auto not-prose">
+        <table class="table table-zebra">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Default</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>page</code></td>
+              <td>integer (1-20)</td>
+              <td>1</td>
+              <td>Which page file to read (logs_page_&#123;page&#125;.json)</td>
+            </tr>
+            <tr>
+              <td><code>limit</code></td>
+              <td>integer (1-10000)</td>
+              <td>10000</td>
+              <td>Maximum rows to return from the page file</td>
+            </tr>
+            <tr>
+              <td><code>apikey</code></td>
+              <td>string</td>
+              <td>—</td>
+              <td>Required. Demo keys: <code>demo123</code>, <code>readonly</code>, <code>expired</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Code examples</h3>
+      <div class="tabs tabs-boxed not-prose w-full mb-2">
+        <button id="tab-curl" class="tab tab-active">curl</button>
+        <button id="tab-js" class="tab">JavaScript</button>
+      </div>
+      <div id="ex-curl" class="not-prose">
+        <pre class="mockup-code"><code>curl "{endpoint}?page=1&limit=10&apikey=demo123"</code></pre>
+      </div>
+      <div id="ex-js" class="not-prose hidden">
+        <pre class="mockup-code"><code>const url = "{endpoint}?page=1&limit=10&apikey=demo123";
+const res = await fetch(url);
+const json = await res.json();</code></pre>
+      </div>
+
+      <h3>Response</h3>
+      <pre class="mockup-code"><code>&#123;
+  "data": [
+    &#123; "ip": "127.0.0.1", "ts": "2024-01-01T00:00:00Z", "status": 200 &#125;
+  ],
+  "meta": &#123; "page": 1, "limit": 10000, "total": 10000 &#125;
+&#125;</code></pre>
+    </section>
+
+    <aside class="lg:col-span-1" data-endpoint={endpoint}>
+      <div class="card bg-base-100 shadow">
+        <div class="card-body gap-3">
+          <h2 class="card-title">Try it</h2>
+          <label class="form-control w-full">
+            <span class="label-text">API key</span>
+            <input id="apikey" class="input input-bordered w-full" placeholder="demo123" value="demo123" />
+          </label>
+          <div class="grid grid-cols-2 gap-2">
+            <label class="form-control">
+              <span class="label-text">Page</span>
+              <input id="page" type="number" min="1" max="20" value="1" class="input input-bordered" />
+            </label>
+            <label class="form-control">
+              <span class="label-text">Limit</span>
+              <input id="limit" type="number" min="1" max="10000" value="10" class="input input-bordered" />
+            </label>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="send" class="btn btn-primary">Send request</button>
+            <button id="copy-url" class="btn btn-ghost btn-sm">Copy URL</button>
+          </div>
+          <div class="flex items-center gap-3 text-sm">
+            <span id="status" class="badge">ready</span>
+            <span id="timing" class="opacity-70"></span>
+          </div>
+          <div class="text-xs opacity-70 break-all" id="requrl"></div>
+          <pre class="mockup-code max-h-80 overflow-auto" id="result-json"><code>// Response will appear here</code></pre>
+          <div class="flex justify-end">
+            <button id="copy-json" class="btn btn-ghost btn-sm">Copy JSON</button>
+          </div>
+          <div id="meta" class="text-xs opacity-70"></div>
+        </div>
+      </div>
+    </aside>
+  </article>
+
+  <script is:inline>
+    const container = document.querySelector('aside[data-endpoint]');
+    const endpointUrl = container && container instanceof HTMLElement && container.dataset.endpoint ? container.dataset.endpoint : '';
+  const apikey = document.getElementById('apikey');
+    const pageInput = document.getElementById('page');
+    const limitInput = document.getElementById('limit');
+    const btn = document.getElementById('send');
+    const requrl = document.getElementById('requrl');
+    const resultJson = document.getElementById('result-json');
+    const meta = document.getElementById('meta');
+  const statusBadge = document.getElementById('status');
+  const timing = document.getElementById('timing');
+  const copyUrlBtn = document.getElementById('copy-url');
+  const copyJsonBtn = document.getElementById('copy-json');
+  const copyEndpointBtn = document.getElementById('copy-endpoint');
+  const tabCurl = document.getElementById('tab-curl');
+  const tabJs = document.getElementById('tab-js');
+  const exCurl = document.getElementById('ex-curl');
+  const exJs = document.getElementById('ex-js');
+
+    function buildUrl() {
+      const u = new URL(endpointUrl, window.location.origin);
+      const pageVal = (pageInput && 'value' in pageInput && pageInput.value) ? pageInput.value : '1';
+      const limitVal = (limitInput && 'value' in limitInput && limitInput.value) ? limitInput.value : '1';
+      u.searchParams.set('page', String(pageVal));
+      u.searchParams.set('limit', String(limitVal));
+  // Use query param only: include `apikey` in the URL (no headers)
+      const key = (apikey && 'value' in apikey) ? apikey.value : '';
+      if (key) u.searchParams.set('apikey', key);
+      return u.toString();
+    }
+
+    async function send() {
+      const url = buildUrl();
+      if (requrl) requrl.textContent = url;
+      if (resultJson) resultJson.textContent = '// Loading...';
+      if (meta) meta.textContent = '';
+      setStatus('loading');
+      try {
+        const t0 = performance.now();
+        const res = await fetch(url);
+        const t1 = performance.now();
+        if (timing) timing.textContent = `${Math.round(t1 - t0)} ms`;
+        const text = await res.text();
+        let obj = null;
+        try { obj = JSON.parse(text); } catch {}
+        if (resultJson) {
+          resultJson.textContent = obj ? JSON.stringify(obj, null, 2) : (typeof text === 'string' ? text : JSON.stringify(text, null, 2));
+        }
+        setStatus(res.ok ? 'success' : 'error', res.status);
+        if (meta && obj && obj.meta) {
+          const m = obj.meta;
+          meta.textContent = `meta: page=${m.page ?? '-'} • limit=${m.limit ?? '-'} • total=${m.total ?? '-'}`;
+        }
+      } catch (e) {
+        if (resultJson) resultJson.textContent = String(e);
+        setStatus('error');
+      }
+    }
+
+    if (btn) btn.addEventListener('click', send);
+
+    function setStatus(state, code) {
+      if (!statusBadge || !('classList' in statusBadge)) return;
+      statusBadge.classList.remove('badge-success','badge-error','badge-warning');
+      if (state === 'loading') {
+        statusBadge.textContent = 'loading';
+        statusBadge.classList.add('badge-warning');
+      } else if (state === 'success') {
+        statusBadge.textContent = code ? `success · ${code}` : 'success';
+        statusBadge.classList.add('badge-success');
+      } else {
+        statusBadge.textContent = code ? `error · ${code}` : 'error';
+        statusBadge.classList.add('badge-error');
+      }
+    }
+
+    async function copyToClipboard(text) {
+      try {
+        if (navigator.clipboard) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        }
+      } catch {}
+    }
+
+    if (copyUrlBtn) copyUrlBtn.addEventListener('click', () => {
+      const url = buildUrl();
+      copyToClipboard(url);
+    });
+    if (copyJsonBtn) copyJsonBtn.addEventListener('click', () => {
+      if (resultJson && 'textContent' in resultJson) copyToClipboard(resultJson.textContent || '');
+    });
+    if (copyEndpointBtn) copyEndpointBtn.addEventListener('click', () => copyToClipboard(endpointUrl));
+
+    function setExampleTab(which) {
+      const showCurl = which === 'curl';
+      if (tabCurl && 'classList' in tabCurl) tabCurl.classList.toggle('tab-active', showCurl);
+      if (tabJs && 'classList' in tabJs) tabJs.classList.toggle('tab-active', !showCurl);
+      if (exCurl && 'classList' in exCurl) exCurl.classList.toggle('hidden', !showCurl);
+      if (exJs && 'classList' in exJs) exJs.classList.toggle('hidden', showCurl);
+    }
+    if (tabCurl) tabCurl.addEventListener('click', () => setExampleTab('curl'));
+    if (tabJs) tabJs.addEventListener('click', () => setExampleTab('js'));
+  </script>
+</DocsLayout>

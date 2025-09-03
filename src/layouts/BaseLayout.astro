@@ -1,0 +1,56 @@
+---
+/*
+Copyright 2025 G Vaishno Chaitanya
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+interface Props { title?: string }
+const { title = 'Mock API Portal' } = Astro.props as Props;
+import '../styles/tailwind.css';
+const base = import.meta.env.BASE_URL || '/';
+---
+<html lang="en" data-theme="dim">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>{title}</title>
+    
+  </head>
+  <body class="min-h-screen bg-base-200 text-base-content">
+    <header class="border-b bg-base-100">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-6">
+        <a class="text-xl font-semibold" href={(base.endsWith('/') ? `${base}` : `${base}/`)}>Mock API</a>
+        <nav class="flex items-center gap-4 text-sm">
+          <a class="hover:underline" href={(base.endsWith('/') ? `${base}docs/` : `${base}/docs/`)}>Docs Home</a>
+          <a class="hover:underline" href={(base.endsWith('/') ? `${base}docs/nginx/` : `${base}/docs/nginx/`)}>Nginx</a>
+          <a class="hover:underline" href={(base.endsWith('/') ? `${base}keys/` : `${base}/keys/`)}>API Keys</a>
+        </nav>
+      </div>
+    </header>
+    <main class="max-w-7xl mx-auto px-4 py-6">
+      <slot />
+    </main>
+    <footer class="footer footer-center p-4 bg-base-100 text-base-content">
+      <aside>
+        <p>Mock API Portal</p>
+      </aside>
+    </footer>
+  </body>
+  <script>
+    if ('serviceWorker' in navigator) {
+      const base = import.meta.env.BASE_URL || '/';
+      navigator.serviceWorker.register(new URL('sw.js', base).toString()).catch(() => {});
+    }
+  </script>
+</html>

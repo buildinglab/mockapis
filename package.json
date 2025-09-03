@@ -1,0 +1,26 @@
+{
+  "name": "mocklogserver",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "npm run generate && ASTRO_OUTPUT=static astro build",
+    "preview": "astro preview",
+    "generate": "tsx scripts/generate-nginx-logs.ts"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.0.0",
+    "astro": "^4.10.0"
+  },
+  "devDependencies": {
+    "@astrojs/node": "^8.2.5",
+    "@astrojs/tailwind": "^6.0.2",
+    "@types/node": "^20.12.12",
+    "autoprefixer": "^10.4.21",
+    "daisyui": "^5.1.6",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.15.7",
+    "typescript": "^5.5.3"
+  }
+}
